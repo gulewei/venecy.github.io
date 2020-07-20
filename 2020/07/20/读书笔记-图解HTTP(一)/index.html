@@ -1,0 +1,90 @@
+<!DOCTYPE html><html lang="zh-cn"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><title> 读书笔记-图解HTTP(一) · gulewei's blog</title><meta name="description" content="读书笔记-图解HTTP(一) - gulewei"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" href="/"><link rel="stylesheet" href="/css/style.css"><link rel="search" type="application/opensearchdescription+xml" href="https://gulewei.com/atom.xml" title="gulewei's blog"><meta name="generator" content="Hexo 4.0.0"></head><body><div class="wrap"><header><h1 class="title">gulewei's blog</h1><ul class="nav nav-list"><li class="nav-list-item"><a class="nav-list-link" href="/" target="_self">HOME</a></li><li class="nav-list-item"><a class="nav-list-link" href="/archives/" target="_self">ARCHIVE</a></li></ul></header><main class="container"><div class="post"><article class="post-block"><h1 class="post-title">读书笔记-图解HTTP(一)</h1><div class="post-info">2020-07-20</div><div class="post-content"><h1 id="读书笔记-图解-HTTP（一）"><a href="#读书笔记-图解-HTTP（一）" class="headerlink" title="读书笔记 - 图解 HTTP（一）"></a>读书笔记 - 图解 HTTP（一）</h1><p>绝大部分 Web 服务构建与 HTTP 协议之上，因此 HTTP 协议内容也早已与当前 Web 服务的特点密不可分，了解 HTTP 的同时也要了解整个 Web 服务的构成。</p>
+<h2 id="网络基础"><a href="#网络基础" class="headerlink" title="网络基础"></a>网络基础</h2><p>了解 HTTP 所需的 TCP/IP 概要</p>
+<h3 id="TCP-IP-协议族"><a href="#TCP-IP-协议族" class="headerlink" title="TCP/IP 协议族"></a>TCP/IP 协议族</h3><p>网络设备要相互通信须要遵守相同的规则，规则涉及到通信过程的方方面面，称作协议（protocal）。互联网相关的各类协议集合起来总称为 TCP/IP 协议族</p>
+<h4 id="分层管理"><a href="#分层管理" class="headerlink" title="分层管理"></a>分层管理</h4><p>TCP/IP 协议族按层次划分为 4 层：</p>
+<ul>
+<li>应用层：应用层决定向用户提供服务时的通信活动，如 FTP、DNS、HTTP</li>
+<li>传输层：提供网络间设备的数据传输，如 TCP、UDP</li>
+<li>网络层：处理网络中流动的数据包</li>
+<li>数据链路层：连接网络的硬件部分</li>
+</ul>
+<h4 id="通信传输流"><a href="#通信传输流" class="headerlink" title="通信传输流"></a>通信传输流</h4><p>按照分层顺序，发送端从应用层往下走，接收端从链路层往上走。发送端层与层传输数据时，每经过一层都会打上该层所属的首部信息，反之，接收端层与层之间传输则会把对应的首部消去，这种把数据信息包装起来的方法称为封装（encapsulate）。</p>
+<h3 id="IP"><a href="#IP" class="headerlink" title="IP"></a>IP</h3><p>IP 的作用时把数据包传送给对方。保证传送给对方需要满足各类条件，比较重要的两个是 IP 地址和 MAC 地址。</p>
+<h3 id="TCP"><a href="#TCP" class="headerlink" title="TCP"></a>TCP</h3><p>TCP 提供可靠的字节流服务（Byte Stream Service）。为了方便传输，把大块数据分割成以报文（segment）为单位的数据包进行管理，并且能够确认数据最终是否送达对方。<br>为了确认数据准确送达，TCP 采用三次握手策略（three-way handshake）。握手中使用了 TCP 的标志 SYN（synchronize）和 ACK（acknowledgement）。握手过程如下：</p>
+<ul>
+<li>发送端发送带 SYN 标志的数据包</li>
+<li>接收端回传带 SYN/ACK 标志的数据包以示确认</li>
+<li>发送端回传带 ACK 标志的数据包代表结束</li>
+</ul>
+<p>（为什么一定是 3 次，不能是 2 次或者 4 次？）</p>
+<h3 id="DNS"><a href="#DNS" class="headerlink" title="DNS"></a>DNS</h3><p>DNS 负责域名解析，通过域名查到 IP 地址，或者逆向从 IP 查到域名。</p>
+<h3 id="URI"><a href="#URI" class="headerlink" title="URI"></a>URI</h3><p>URI 用于标识某一互联网资源，URL 则表示资源所处的位置。URL 是 URI 的子集，不过在充分理解的基础上也可用 URL 替换 URI。<br>以 <em><a href="http://user:pass@www.example.com:80/dir/index.html?uid=1#ch1" target="_blank" rel="noopener">http://user:pass@www.example.com:80/dir/index.html?uid=1#ch1</a></em> 为例 URI 格式如下：</p>
+<ul>
+<li>协议方案名 <code>http://</code></li>
+<li>登录信息（认证）<code>user:pass</code></li>
+<li>服务器地址 <code>www.example.com</code></li>
+<li>服务器端口号 <code>80</code></li>
+<li>带层次的文件路径 <code>dir/index.html</code></li>
+<li>查询字符串 <code>uid=1</code></li>
+<li>片段标识符 <code>ch1</code></li>
+</ul>
+<h2 id="HTTP-协议内容"><a href="#HTTP-协议内容" class="headerlink" title="HTTP 协议内容"></a>HTTP 协议内容</h2><h3 id="通信过程"><a href="#通信过程" class="headerlink" title="通信过程"></a>通信过程</h3><p>HTTP 协议服务于客户端和服务端之间，请求必定由客户端发出，服务端响应该请求并返回。</p>
+<h3 id="报文"><a href="#报文" class="headerlink" title="报文"></a>报文</h3><p>用于 HTTP 协议交换的信息称为 HTTP 报文，分别有客户端发出的请求报文和服务端的响应报文。</p>
+<ul>
+<li>报文首部 服务端或客户端需处理的请求或响应的内容及属性</li>
+<li>空行（CR+LF）第一个出现的空行划分首部和主体</li>
+<li>报文主体 应被发送的数据</li>
+</ul>
+<p>通常，并不一定要有报文主体。<br>请求报文和响应报文首部：</p>
+<ul>
+<li>请求行 包含请求方法，请求 URI，HTTP 版本</li>
+<li>状态行 包含响应结果的状态吗，原因短语，HTTP 版本</li>
+<li>首部字段 包含请求和响应各种条件的各类首部</li>
+<li>其他 可能包含 HTTP 的 RFC 里未定义的首部（Cookie 等）</li>
+</ul>
+<h3 id="请求方法"><a href="#请求方法" class="headerlink" title="请求方法"></a>请求方法</h3><p>请求方法用于告知服务端请求的意图，可以指定请求的资源按期望产生某种行为。</p>
+<ul>
+<li>GET：获取资源</li>
+<li>POST：传输实体主体</li>
+<li>PUT：传输文件</li>
+<li>HEAD：获得报文首部</li>
+<li>DELETE：删除文件</li>
+<li>OPTIONS：询问支持的方法</li>
+<li>TRACE：追踪路径</li>
+<li>CONNECT：要求用隧道协议连接代理</li>
+</ul>
+<p>注意方法名区分大小写。<br>由于 HTTP/1.1 的 PUT 和 DELETE 方法不带验证机制，存在安全性问题，一般的 Web 网站不使用该方法。若配合 Web 应用验证机制，或架构设计采用 REST 标准或有可能开放使用。</p>
+<h3 id="状态码"><a href="#状态码" class="headerlink" title="状态码"></a>状态码</h3><p>状态码负责表示客户端 HTTP 请求的返回结果、标记服务器端的处理是否正常、通知出现的错误等工作。</p>
+<ul>
+<li><p>2XX 成功</p>
+<ul>
+<li>200 OK</li>
+<li>204 No Content</li>
+<li>206 Partial Content</li>
+</ul>
+</li>
+<li><p>3XX 重定向</p>
+<ul>
+<li>301 Moved Permanently</li>
+<li>302 Found</li>
+<li>303 See Other</li>
+<li>304 Not Modified</li>
+<li>307 Temporary Redirect</li>
+</ul>
+</li>
+<li><p>4XX 客户端错误</p>
+<ul>
+<li>401 Unauthorized</li>
+<li>403 Forbidden</li>
+<li>404 Not Found</li>
+</ul>
+</li>
+<li><p>5XX 服务器错误</p>
+<ul>
+<li>500 Internal Server Error</li>
+<li>503 Service Unavailable</li>
+</ul>
+</li>
+</ul>
+<p>状态码并不一定能反映出真实的状况，比如 Web 应用程序内部发生错误，状态码依然返回 200 OK，这种情况也经常遇到。</p>
+<h3 id="首部"><a href="#首部" class="headerlink" title="首部"></a>首部</h3></div></article></div></main><footer><div class="paginator"><a class="prev" href="/2020/07/20/hi-there/">上一篇</a></div><div class="copyright"><p>© 2019 - 2020 </p><p>Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>.</p></div></footer></div></body></html>
